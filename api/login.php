@@ -31,7 +31,7 @@ if ($result->num_rows > 0) {
         $roles = [
             'admin' => 'SELECT * FROM `admin` WHERE `id_user` = ' . $user['id'] . ' LIMIT 1',
             'pemimpin' => 'SELECT * FROM `pemimpin` WHERE `id_user` = ' . $user['id'] . ' LIMIT 1',
-            'kompetitor' => 'SELECT * FROM `kompetitor` WHERE `id_user` = ' . $user['id'] . ' LIMIT 1'
+            'kontributor' => 'SELECT * FROM `kompetitor` WHERE `id_user` = ' . $user['id'] . ' LIMIT 1'
         ];
 
         foreach ($roles as $role => $query) {
