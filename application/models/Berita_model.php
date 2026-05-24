@@ -12,23 +12,22 @@ class Berita_model extends CI_Model {
     }
 
     public function get_berita_by_kategori($kategori_id) {
-        // Mengambil berita berdasarkan kategori
-        $this->db->select('m.id, m.judul, m.url, m.tanggal, m.gambar');
+        $this->db->select('m.id, m.judul, m.url, m.tanggal, m.gambar, m.deskripsi');
         $this->db->from('media m');
-        $this->db->join('kategori k', 'm.id_kategori = k.id');
         $this->db->where('m.id_kategori', $kategori_id);
-        $this->db->where('m.status', 'disetujui'); // Pastikan berita yang tampil sudah disetujui
+        $this->db->where('m.status', 'disetujui');
+        $this->db->order_by('m.tanggal', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }
 
     public function search_berita($search_term) {
-        // Mencari berita berdasarkan kata kunci
-        $this->db->select('m.id, m.judul, m.url, m.tanggal, m.gambar');
+        $this->db->select('m.id, m.judul, m.url, m.tanggal, m.gambar, m.deskripsi');
         $this->db->from('media m');
-        $this->db->like('m.judul', $search_term); // Mencari berita yang judulnya mengandung kata kunci
-        $this->db->or_like('m.deskripsi', $search_term); // Mencari berita yang deskripsinya mengandung kata kunci
+        $this->db->like('m.judul', $search_term);
+        $this->db->or_like('m.deskripsi', $search_term);
         $this->db->where('m.status', 'disetujui');
+        $this->db->order_by('m.tanggal', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }

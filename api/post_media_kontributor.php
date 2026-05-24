@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Ambil data dari form-data
+    $id_user = isset($_POST['id_user']) ? intval($_POST['id_user']) : null;
     $id_kategori = isset($_POST['id_kategori']) ? intval($_POST['id_kategori']) : null;
     $nama = isset($_POST['nama']) ? $conn->real_escape_string($_POST['nama']) : null;
     $judul = isset($_POST['judul']) ? $conn->real_escape_string($_POST['judul']) : null;
@@ -37,30 +38,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tanggal = isset($_POST['tanggal']) ? date("Y-m-d H:i:s", strtotime($_POST['tanggal'])) : date("Y-m-d H:i:s");
     $deskripsi = isset($_POST['deskripsi']) ? $conn->real_escape_string($_POST['deskripsi']) : null;
 
-    // Pastikan direktori upload ada dan izin menulis
+    // PERBAIKAN: Gunakan path relatif saja
     $upload_dir = "../uploads/";
 
-    // Cek direktori absolut untuk debugging
-    $absolute_path = $_SERVER['DOCUMENT_ROOT'] . '/' . $upload_dir;
-    error_log("Absolute path: " . $absolute_path);
+    // Cek path saat ini
+    error_log("Current working directory: " . getcwd());
+    error_log("Script location: " . __DIR__);
 
-    // Buat direktori rekursif jika belum ada
-    if (!is_dir($absolute_path)) {
-        if (!mkdir($absolute_path, 0777, true)) {
-            error_log("Failed to create directory: " . $absolute_path);
+    // Buat path absolut dari lokasi script
+    $absolute_upload_dir = __DIR__ . "/" . $upload_dir;
+    error_log("Absolute upload directory: " . $absolute_upload_dir);
+
+    // Cek dan buat direktori jika belum ada
+    if (!is_dir($absolute_upload_dir)) {
+        if (!mkdir($absolute_upload_dir, 0777, true)) {
+            error_log("Failed to create directory: " . $absolute_upload_dir);
             echo json_encode([
                 "status" => false,
-                "message" => "Gagal membuat direktori upload: " . error_get_last()['message']
+                "message" => "Gagal membuat direktori upload"
             ]);
             exit();
         }
+        error_log("Directory created: " . $absolute_upload_dir);
     }
 
     // Pastikan direktori dapat ditulis
-    if (!is_writable($absolute_path)) {
-        chmod($absolute_path, 0777);
-        if (!is_writable($absolute_path)) {
-            error_log("Directory not writable: " . $absolute_path);
+    if (!is_writable($absolute_upload_dir)) {
+        chmod($absolute_upload_dir, 0777);
+        if (!is_writable($absolute_upload_dir)) {
+            error_log("Directory not writable: " . $absolute_upload_dir);
             echo json_encode([
                 "status" => false,
                 "message" => "Direktori upload tidak dapat diakses untuk menulis"
@@ -70,33 +76,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Ambil ekstensi file dan buat nama baru
-    $file_ext = pathinfo($_FILES['gambar']['name'], PATHINFO_EXTENSION);
-    $file_name = time() . "." . $file_ext;
-    $file_path = $absolute_path . $file_name;
+    $file_ext = strtolower(pathinfo($_FILES['gambar']['name'], PATHINFO_EXTENSION));
 
-    error_log("Trying to upload to: " . $file_path);
+    // Validasi ekstensi file
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+    if (!in_array($file_ext, $allowed_extensions)) {
+        echo json_encode([
+            "status" => false,
+            "message" => "Format file tidak didukung. Gunakan: " . implode(', ', $allowed_extensions)
+        ]);
+        exit();
+    }
 
-    // Coba pindahkan file yang diupload
+    $file_name = time() . "_" . uniqid() . "." . $file_ext;
+    $file_path = $absolute_upload_dir . $file_name;
+
+    error_log("Uploading file to: " . $file_path);
+    error_log("Temp file: " . $_FILES['gambar']['tmp_name']);
+    error_log("File size: " . $_FILES['gambar']['size']);
+    error_log("File exists before upload: " . (file_exists($_FILES['gambar']['tmp_name']) ? 'YES' : 'NO'));
+
+    // Coba pindahkan file
     if (move_uploaded_file($_FILES['gambar']['tmp_name'], $file_path)) {
         error_log("File successfully uploaded to: " . $file_path);
+        error_log("File exists after upload: " . (file_exists($file_path) ? 'YES' : 'NO'));
 
         // Simpan data ke database menggunakan prepared statement
-        $sql = "INSERT INTO media (id_kategori, nama, judul, url, status, tanggal, gambar, deskripsi, view) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)";
+        $sql = "INSERT INTO media (id_kategori, id_user, nama, judul, url, status, tanggal, gambar, deskripsi, view)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
-            error_log("Database error: " . $conn->error);
-            echo json_encode([
-                "status" => false,
-                "message" => "Gagal mempersiapkan statement: " . $conn->error
-            ]);
+            echo json_encode(["status" => false, "message" => "Gagal mempersiapkan statement: " . $conn->error]);
             exit();
         }
 
-        // Bind parameter ke statement
         $stmt->bind_param(
-            "isssssss",
+            "iisssssss",
             $id_kategori,
+            $id_user,
             $nama,
             $judul,
             $url,
@@ -118,7 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     "status" => $status,
                     "tanggal" => $tanggal,
                     "gambar" => $file_name,
-                    "deskripsi" => $deskripsi
+                    "deskripsi" => $deskripsi,
+                    "upload_path" => $file_path // Untuk debugging
                 ]
             ]);
         } else {
@@ -132,10 +150,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     } else {
         $error = error_get_last();
-        error_log("Failed to move uploaded file: " . ($error ? $error['message'] : 'Unknown error'));
+        error_log("Failed to move uploaded file: " . print_r($error, true));
         echo json_encode([
             "status" => false,
-            "message" => "Gagal menyimpan file ke server: " . ($error ? $error['message'] : 'Unknown error')
+            "message" => "Gagal mengupload file: " . ($error ? $error['message'] : 'Unknown error')
         ]);
     }
 } else {

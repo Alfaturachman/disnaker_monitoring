@@ -5,7 +5,7 @@ header("Content-Type: application/json");
 // Ambil raw data JSON dari body request
 $data = json_decode(file_get_contents("php://input"), true);
 
-// Validasi input
+// Validasi input dasar
 if (!isset($data['email']) || !isset($data['password'])) {
     echo json_encode(["status" => false, "error" => "Email dan password harus diisi"]);
     exit();
@@ -25,8 +25,17 @@ if ($conn->query($sql_insert_user)) {
         $nama = $conn->real_escape_string($data['nama']);
         $telp = $conn->real_escape_string($data['telp']);
         $alamat = $conn->real_escape_string($data['alamat']);
+        $instansi = isset($data['instansi']) ? $conn->real_escape_string($data['instansi']) : null;
+        $jabatan = isset($data['jabatan']) ? $conn->real_escape_string($data['jabatan']) : null;
+        $alasan = isset($data['alasan']) ? $conn->real_escape_string($data['alasan']) : null;
 
-        $sql_insert_kompetitor = "INSERT INTO `kompetitor` (`id_user`, `nama`, `telp`, `alamat`) VALUES ('$id_user', '$nama', '$telp', '$alamat')";
+        $sql_insert_kompetitor = "
+            INSERT INTO `kompetitor` 
+            (`id_user`, `nama`, `telp`, `alamat`, `instansi`, `jabatan`, `alasan`) 
+            VALUES 
+            ('$id_user', '$nama', '$telp', '$alamat', '$instansi', '$jabatan', '$alasan')
+        ";
+
         if ($conn->query($sql_insert_kompetitor)) {
             echo json_encode([
                 "status" => true,

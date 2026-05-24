@@ -10,23 +10,22 @@ class Berita extends CI_Controller {
     }
 
     public function index($kategori_id = null) {
-        // Ambil semua kategori
         $data['kategori'] = $this->Berita_model->get_all_kategori();
+        $data['selected_kategori'] = $kategori_id;
 
-        // Ambil berita berdasarkan kategori jika ada
-        if ($kategori_id) {
-            $data['berita'] = $this->Berita_model->get_berita_by_kategori($kategori_id);
-        } else {
-            $data['berita'] = [];
-        }
+        $search_term = $this->input->post('search_term') ?: $this->input->get('search');
 
-        // Pencarian
-        $search_term = $this->input->post('search_term'); // Ambil kata kunci pencarian
         if ($search_term) {
             $data['berita'] = $this->Berita_model->search_berita($search_term);
+            $data['search_term'] = $search_term;
+        } elseif ($kategori_id) {
+            $data['berita'] = $this->Berita_model->get_berita_by_kategori($kategori_id);
+            $data['search_term'] = '';
+        } else {
+            $data['berita'] = $this->MediaModel->getMediaBerita();
+            $data['search_term'] = '';
         }
 
-        // Memuat tampilan
         $this->load->view('frontend/partials/header');
         $this->load->view('frontend/pages/berita', $data);
         $this->load->view('frontend/partials/footer');
