@@ -1,0 +1,63 @@
+<?php
+$sqlitePath = __DIR__ . '/test.sqlite';
+
+$pdo = new PDO('sqlite:' . $sqlitePath);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+$sql = "
+CREATE TABLE IF NOT EXISTS admin (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_user INTEGER DEFAULT NULL,
+  nama TEXT DEFAULT NULL,
+  nip TEXT DEFAULT NULL,
+  telp TEXT DEFAULT NULL,
+  alamat TEXT DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS kategori (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama_kategori TEXT DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS kompetitor (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_user INTEGER DEFAULT NULL,
+  nama TEXT DEFAULT NULL,
+  telp TEXT DEFAULT NULL,
+  alamat TEXT DEFAULT NULL,
+  instansi TEXT DEFAULT NULL,
+  jabatan TEXT DEFAULT NULL,
+  alasan TEXT DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS media (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_kategori INTEGER DEFAULT NULL,
+  nama TEXT DEFAULT NULL,
+  judul TEXT DEFAULT NULL,
+  url TEXT DEFAULT NULL,
+  status TEXT DEFAULT NULL,
+  tanggal TEXT DEFAULT NULL,
+  gambar TEXT DEFAULT NULL,
+  deskripsi TEXT DEFAULT NULL,
+  view REAL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS pemimpin (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_user INTEGER DEFAULT NULL,
+  nama TEXT DEFAULT NULL,
+  nip TEXT DEFAULT NULL,
+  telp TEXT DEFAULT NULL,
+  alamat TEXT DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT DEFAULT NULL,
+  password TEXT DEFAULT NULL
+);
+";
+
+$pdo->exec($sql);
+echo "Database test.sqlite initialized successfully.\n";

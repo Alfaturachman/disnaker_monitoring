@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: disnaker_web
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - ENVIRONMENT=development
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - disnaker_net
+
+  db:
+    image: mysql:8.0
+    container_name: disnaker_db
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: disnaker-monitoring
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./disnaker-monitoring.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - disnaker_net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: disnaker_pma
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - db
+    networks:
+      - disnaker_net
+
+volumes:
+  db_data:
+
+networks:
+  disnaker_net:
+    driver: bridge

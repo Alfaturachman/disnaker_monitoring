@@ -11,7 +11,19 @@ class Cetak extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->library('session');
         $this->load->model('MediaModel');
+
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('message', 'Silakan login terlebih dahulu!');
+            redirect('auth/login');
+        }
+
+        $userType = $this->session->userdata('user_type');
+        if (!in_array($userType, ['admin', 'pemimpin'])) {
+            $this->session->set_flashdata('message', 'Anda tidak memiliki akses ke halaman ini!');
+            redirect('home');
+        }
     }
 
     public function laporan()

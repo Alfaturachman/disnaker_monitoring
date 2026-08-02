@@ -37,49 +37,58 @@ class User extends CI_Controller
     // Method untuk menambah user
     public function create()
     {
+        $this->load->library('form_validation');
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = $this->input->post('email');
-            $password = password_hash($this->input->post('password'), PASSWORD_DEFAULT);
-            $role = $this->input->post('role');
-            $nama = $this->input->post('nama');
-            $nip = $this->input->post('nip');
-            $telp = $this->input->post('telp');
-            $alamat = $this->input->post('alamat');
+            $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+            $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]');
+            $this->form_validation->set_rules('nama', 'Nama', 'required');
+            $this->form_validation->set_rules('role', 'Role', 'required');
 
-            // Insert ke tabel user
-            $user_data = [
-                'email' => $email,
-                'password' => $password
-            ];
+            if ($this->form_validation->run() == TRUE) {
+                $email = $this->input->post('email');
+                $password = password_hash($this->input->post('password'), PASSWORD_DEFAULT);
+                $role = $this->input->post('role');
+                $nama = $this->input->post('nama');
+                $nip = $this->input->post('nip');
+                $telp = $this->input->post('telp');
+                $alamat = $this->input->post('alamat');
 
-            // Menyimpan user terlebih dahulu
-            $this->db->insert('user', $user_data);
-            $user_id = $this->db->insert_id();  // Mendapatkan id_user
-
-            // Insert ke tabel admin atau pemimpin sesuai dengan role
-            if ($role == 'admin') {
-                $admin_data = [
-                    'id_user' => $user_id,
-                    'nama' => $nama,
-                    'nip' => $nip,
-                    'telp' => $telp,
-                    'alamat' => $alamat
+                // Insert ke tabel user
+                $user_data = [
+                    'email' => $email,
+                    'password' => $password
                 ];
-                $this->db->insert('admin', $admin_data);
-            } elseif ($role == 'pemimpin') {
-                $pemimpin_data = [
-                    'id_user' => $user_id,
-                    'nama' => $nama,
-                    'nip' => $nip,
-                    'telp' => $telp,
-                    'alamat' => $alamat
-                ];
-                $this->db->insert('pemimpin', $pemimpin_data);
+
+                // Menyimpan user terlebih dahulu
+                $this->db->insert('user', $user_data);
+                $user_id = $this->db->insert_id();  // Mendapatkan id_user
+
+                // Insert ke tabel admin atau pemimpin sesuai dengan role
+                if ($role == 'admin') {
+                    $admin_data = [
+                        'id_user' => $user_id,
+                        'nama' => $nama,
+                        'nip' => $nip,
+                        'telp' => $telp,
+                        'alamat' => $alamat
+                    ];
+                    $this->db->insert('admin', $admin_data);
+                } elseif ($role == 'pemimpin') {
+                    $pemimpin_data = [
+                        'id_user' => $user_id,
+                        'nama' => $nama,
+                        'nip' => $nip,
+                        'telp' => $telp,
+                        'alamat' => $alamat
+                    ];
+                    $this->db->insert('pemimpin', $pemimpin_data);
+                }
+
+                // Redirect setelah berhasil
+                $this->session->set_flashdata('message', 'User berhasil ditambahkan');
+                redirect('user');
             }
-
-            // Redirect setelah berhasil
-            $this->session->set_flashdata('message', 'User berhasil ditambahkan');
-            redirect('user');
         }
 
         // Menampilkan halaman tambah user

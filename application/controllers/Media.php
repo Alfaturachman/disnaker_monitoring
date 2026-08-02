@@ -10,6 +10,17 @@ class Media extends CI_Controller
         $this->load->database();
         $this->load->library(['session', 'form_validation']);
         $this->load->model(['MediaModel', 'KategoriModel']);
+
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('message', 'Silakan login terlebih dahulu!');
+            redirect('auth/login');
+        }
+
+        $userType = $this->session->userdata('user_type');
+        if (!in_array($userType, ['admin', 'pemimpin'])) {
+            $this->session->set_flashdata('message', 'Anda tidak memiliki akses ke halaman ini!');
+            redirect('home');
+        }
     }
 
     public function index()
@@ -178,6 +189,10 @@ class Media extends CI_Controller
 
     public function delete_media($id)
     {
+        $media = $this->MediaModel->get_media_by_id($id);
+        if ($media && !empty($media['gambar']) && file_exists('./uploads/' . $media['gambar'])) {
+            @unlink('./uploads/' . $media['gambar']);
+        }
         $this->MediaModel->delete_media($id);
         $this->session->set_flashdata('success', 'Data berhasil dihapus.');
         redirect('media');

@@ -153,8 +153,10 @@ class Auth extends CI_Controller
         // Hapus data session yang spesifik
         $this->session->unset_userdata(['logged_in', 'user_id', 'user_type', 'user_name']);
 
-        // Hancurkan session
-        $this->session->sess_destroy();
+        // Hancurkan session jika aktif
+        if (session_id()) {
+            @$this->session->sess_destroy();
+        }
 
         // Redirect ke halaman login setelah logout
         redirect('auth/login');

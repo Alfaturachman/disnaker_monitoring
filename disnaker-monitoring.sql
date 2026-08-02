@@ -67,6 +67,9 @@ CREATE TABLE `kompetitor` (
   `nama` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `telp` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `alamat` text COLLATE utf8mb4_general_ci,
+  `instansi` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `jabatan` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `alasan` text COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
