@@ -3,8 +3,14 @@
 
 ---
 
+### 0. Alamat Akses Aplikasi
+Alamat bergantung pada metode deployment:
+
+- **Docker (default)** — `http://localhost:8080/` (sesuai `docker-compose.yml`).
+- **Laragon manual** — `http://localhost/disnaker-monitoring/` (sesuai `base_url` di `application/config/config.php`).
+
 ### 1. Panduan Pengunjung Umum (Public View)
-1. **Membaca Berita Terkini**: Akses halaman utama portal `http://localhost:8080/`. Berita yang ditampilkan adalah pemberitaan yang telah diverifikasi dan `disetujui`.
+1. **Membaca Berita Terkini**: Akses halaman utama portal (lihat alamat pada bagian atas). Berita yang ditampilkan adalah pemberitaan yang telah diverifikasi dan `disetujui`.
 2. **Pencarian Berita**: Ketik kata kunci pada kotak pencarian di halaman `/berita` lalu tekan **Enter** atau tombol **Cari**.
 3. **Filter Kategori**: Klik nama kategori pada bagian samping/menu berita untuk menyaring pemberitaan berdasarkan topik spesifik (seperti *Pelatihan*, *Lowongan*, *PHK*).
 4. **Membaca Berita Lengkap**: Klik judul artikel atau gambar berita untuk membuka detail halaman dan diarahkan ke sumber berita resmi.

@@ -41,7 +41,7 @@ Antarmuka pengguna (UI) dirancang mengacu pada prinsip modern kedinasan:
 
 ### 4. Design System Resmi (Tema "Semarang Red")
 
-> Sumber otoritatif saat ini adalah file `skill.sh` di root proyek. Gunakan panduan ini
+> Sumber otoritatif saat ini adalah stylesheet `assets/css/frontend.css`. Gunakan panduan ini
 > sebagai standar tunggal untuk styling — bukan skema biru pada bagian di atas.
 
 #### 4.1 Design Tokens (CSS Variables)
